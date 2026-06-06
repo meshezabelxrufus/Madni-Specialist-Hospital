@@ -5,8 +5,10 @@
     transparent  at top, renders over the intro video
     solid        frosted glass after 80px scroll
 
-  Framer Motion controls backgroundColor / backdropFilter via navbarVariants.
-  CSS handles all hover micro-interactions.
+  Breakpoints:
+    ≥ 1100px  all 7 dept links visible
+    900–1099  compact labels (icon only for overflow items)
+    ≤ 768px   hamburger only — drawer shows full menu
 */
 
 /* ── Shell ──────────────────────────────────────────────────── */
@@ -39,18 +41,16 @@
   gap: 0.625rem;
   background: none;
   border: none;
-  text-decoration: none;   /* reset <a> underline */
+  text-decoration: none;
   cursor: pointer;
   padding: 0.25rem 0.375rem 0.25rem 0.25rem;
   border-radius: 10px;
   transition: opacity 0.25s ease;
+  flex-shrink: 0;
 }
 
-.logo:hover {
-  opacity: 0.85;
-}
+.logo:hover { opacity: 0.85; }
 
-/* Periwinkle square with a medical cross icon */
 .logoMark {
   display: flex;
   align-items: center;
@@ -71,7 +71,6 @@
   box-shadow: 0 0 18px rgba(159, 161, 255, 0.42);
 }
 
-/* Text block: bold name + small subtitle stacked */
 .logoName {
   display: flex;
   flex-direction: column;
@@ -106,12 +105,21 @@
   gap: 0.25rem;
 }
 
+/* ── Desktop nav (hidden on mobile) ─────────────────────────── */
+
+.desktopNav {
+  display: flex;
+}
+
 /* ── Nav list ───────────────────────────────────────────────── */
 
 .navList {
   display: flex;
   align-items: center;
   gap: 0.125rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .navLink {
@@ -119,20 +127,22 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.875rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 100px;
   background: none;
   border: none;
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
+  font-size: 0.8125rem;
   font-weight: 400;
   color: var(--color-text-secondary);
   letter-spacing: 0.01em;
+  text-decoration: none;
   transition:
     color      var(--duration-base) ease,
     background var(--duration-base) ease;
   isolation: isolate;
+  white-space: nowrap;
 }
 
 .navLink:hover {
@@ -140,13 +150,12 @@
   background: rgba(159, 161, 255, 0.09);
 }
 
-/* Sliding underline — grows from center on hover */
 .navLink::after {
   content: '';
   position: absolute;
   bottom: 5px;
   left: 50%;
-  width: calc(100% - 1.75rem);
+  width: calc(100% - 1.5rem);
   height: 1.5px;
   border-radius: 1px;
   background: var(--color-accent);
@@ -169,15 +178,9 @@
   transition: opacity 0.2s ease;
 }
 
-.navLink:hover .navIcon {
-  opacity: 1;
-}
+.navLink:hover .navIcon { opacity: 1; }
 
 /* ── Book Appointment CTA ───────────────────────────────────── */
-/*
-  Visually separated from nav links: pill shape, WhatsApp green,
-  with a subtle glass fill. Lives to the right of the nav list.
-*/
 
 .bookBtn {
   display: flex;
@@ -214,37 +217,180 @@
   transition-duration: 0.08s;
 }
 
-/* ── Responsive ─────────────────────────────────────────────── */
+/* ── Hamburger button (mobile only) ─────────────────────────── */
 
-@media (max-width: 900px) {
-  /* Hide Surgery link on medium screens to avoid crowding */
-  .navList li:last-child {
-    display: none;
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1.5px solid rgba(123, 126, 245, 0.18);
+  background: rgba(123, 126, 245, 0.06);
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: background 0.2s;
+}
+
+.hamburger:hover {
+  background: rgba(123, 126, 245, 0.12);
+}
+
+.hamburgerLine {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--color-text-primary);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform-origin: center;
+}
+
+/* Open state — lines morph into X */
+.lineTop  { transform: translateY(6.5px) rotate(45deg); }
+.lineMid  { opacity: 0; transform: scaleX(0); }
+.lineBot  { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* ── Mobile drawer ──────────────────────────────────────────── */
+
+.drawer {
+  position: fixed;
+  top: 60px; /* below navbar */
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: rgba(217, 249, 255, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(123, 126, 245, 0.14);
+  padding: 1.25rem var(--gutter) 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+  max-height: calc(100svh - 60px);
+  overflow-y: auto;
+}
+
+.drawerSection {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding: 0.5rem 0 0.25rem;
+}
+
+.drawerList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.drawerLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 0.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-radius: 10px;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+
+.drawerLink:active {
+  background: rgba(123, 126, 245, 0.08);
+  color: var(--color-accent);
+}
+
+.drawerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(123, 126, 245, 0.10);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.drawerDivider {
+  height: 1px;
+  background: rgba(123, 126, 245, 0.12);
+  margin: 0.5rem 0;
+}
+
+.drawerBookBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(37, 211, 102, 0.40);
+  background: rgba(37, 211, 102, 0.12);
+  color: #128c3b;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.drawerBookBtn:active {
+  background: rgba(37, 211, 102, 0.22);
+}
+
+/* ── Responsive breakpoints ─────────────────────────────────── */
+
+/* Medium screens — shrink nav link padding */
+@media (max-width: 1200px) {
+  .navLink {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  .bookBtn {
+    padding: 0.5rem 0.75rem;
   }
 }
 
-@media (max-width: 700px) {
-  /* Hide all nav links — logo + book button only */
-  .navList {
-    display: none;
-  }
+/* Tablet — hide some nav items, keep most */
+@media (max-width: 960px) {
+  /* Hide icons to save space */
+  .navIcon { display: none; }
+  .navLink { gap: 0; }
+}
 
-  .logoSub {
-    display: none;
-  }
+/* Mobile — hide desktop nav, show hamburger */
+@media (max-width: 768px) {
+  .desktopNav { display: none; }
+  .hamburger  { display: flex; }
+  .bookBtn    { display: none; } /* Book CTA lives in the drawer on mobile */
 
-  /* Shrink book button to icon-only pill */
-  .bookBtnText {
-    display: none;
-  }
-
-  .bookBtn {
-    padding: 0.5rem 0.625rem;
-    margin-left: 0;
-  }
+  .logoSub { display: none; }
 
   .inner {
-    padding: 0.875rem 1.25rem;
+    padding: 0.75rem 1.25rem;
   }
 }
 
@@ -255,7 +401,10 @@
   .navLink,
   .navLink::after,
   .navIcon,
-  .bookBtn {
+  .bookBtn,
+  .hamburgerLine,
+  .drawerLink,
+  .drawerBookBtn {
     transition: none;
   }
 }

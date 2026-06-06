@@ -57,4 +57,4 @@ export {
 
 export const HOSPITAL_NAME    = 'Madni Specialist Hospital & Trauma Centre'
 export const HOSPITAL_TAGLINE = 'Where Precision Meets Compassion'
-export const HOSPITAL_ADDRESS = 'Your Address Here'   // ⚠️  replace with real address
+export const HOSPITAL_ADDRESS = 'Tanda Chowk, beside Sadar Police Station, Jalalpur Jattan, District Gujrat, Punjab'

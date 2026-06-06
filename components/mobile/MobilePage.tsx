@@ -16,7 +16,7 @@
  */
 
 import Image from 'next/image'
-import { useRef } from 'react'
+import Link from 'next/link'
 import { getDepartmentsWithDoctors } from '@/lib/hospital/departments'
 import { SUPPORT_STAFF, getInitials } from '@/lib/hospital/supportStaff'
 import { HOSPITAL_NAME, HOSPITAL_TAGLINE, HOSPITAL_ADDRESS } from '@/lib/hospital/data'
@@ -174,6 +174,16 @@ function MobileDeptSection({
         <WhatsAppIconSmall />
         <span>Book Appointment</span>
       </a>
+
+      {/* Explore full department page — matches desktop visual card link */}
+      <Link
+        href={`/departments/${dept.slug}`}
+        className={styles.deptExploreBtn}
+        aria-label={`Explore ${dept.name} department`}
+      >
+        <span>Explore {dept.name}</span>
+        <span aria-hidden="true">→</span>
+      </Link>
     </section>
   )
 }

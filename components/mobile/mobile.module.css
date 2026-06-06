@@ -320,6 +320,32 @@
   border-color: rgba(37, 211, 102, 0.65);
 }
 
+/* Explore department page — ghost outline pill */
+.deptExploreBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
+  background: transparent;
+  border: 1.5px solid rgba(123, 126, 245, 0.25);
+  color: var(--color-accent);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  width: 100%;
+}
+
+.deptExploreBtn:active {
+  background: rgba(123, 126, 245, 0.08);
+  border-color: rgba(123, 126, 245, 0.45);
+}
+
 /* ══════════════════════════════════════════════════════
    SUPPORT SECTION
    ══════════════════════════════════════════════════════ */

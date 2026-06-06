@@ -149,8 +149,21 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const scrollTo: SmoothScrollContextValue['scrollTo'] = (target, options) =>
-    lenisRef.current?.scrollTo(target as string & number & HTMLElement, options)
+  const scrollTo: SmoothScrollContextValue['scrollTo'] = (target, options) => {
+    if (lenisRef.current) {
+      // Desktop: use Lenis for cinematic smooth scroll
+      lenisRef.current.scrollTo(target as string & number & HTMLElement, options)
+    } else if (typeof target === 'number') {
+      // Mobile: Lenis not active — fall back to native smooth scroll
+      window.scrollTo({ top: target, behavior: 'smooth' })
+    } else if (typeof target === 'string') {
+      // Selector string fallback
+      const el = document.querySelector(target)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else if (target instanceof HTMLElement) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   const stop  = () => lenisRef.current?.stop()
   const start = () => lenisRef.current?.start()

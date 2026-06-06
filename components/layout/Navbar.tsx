@@ -82,8 +82,18 @@ export function Navbar() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  const handleNavClick = (vhStart: number) => {
-    scrollTo((vhStart / 100) * window.innerHeight, { duration: 1.6 })
+  const handleNavClick = (deptId: string, vhStart: number) => {
+    // Mobile layout: sections have id="dept-[id]" — scroll to element directly.
+    // This is correct because the mobile page stacks sections as normal blocks.
+    const mobileSection = document.getElementById(`dept-${deptId}`)
+    if (mobileSection) {
+      // Offset by navbar height (~60px) so the section title isn't hidden
+      const top = mobileSection.getBoundingClientRect().top + window.scrollY - 64
+      scrollTo(top)
+    } else {
+      // Desktop sticky canvas: scroll to the vh-based pixel position via Lenis
+      scrollTo((vhStart / 100) * window.innerHeight, { duration: 1.6 })
+    }
     setMenuOpen(false)
   }
 
@@ -137,7 +147,7 @@ export function Navbar() {
                       variants={navLinkVariants}
                       initial="rest"
                       whileHover="hover"
-                      onClick={() => handleNavClick(vhStart)}
+                      onClick={() => handleNavClick(id, vhStart)}
                     >
                       <Icon size={13} className={styles.navIcon} aria-hidden />
                       <span>{label}</span>
@@ -208,7 +218,7 @@ export function Navbar() {
                     {pathname === '/' ? (
                       <button
                         className={styles.drawerLink}
-                        onClick={() => handleNavClick(vhStart)}
+                        onClick={() => handleNavClick(id, vhStart)}
                       >
                         <span className={styles.drawerIcon}><Icon size={16} /></span>
                         <span>{label}</span>

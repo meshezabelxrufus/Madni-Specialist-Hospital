@@ -88,6 +88,7 @@ function MobileDeptSection({
 
   return (
     <section
+      id={`dept-${dept.id}`}
       ref={ref}
       className={`${styles.deptSection} fade-in`}
       style={accentVars}

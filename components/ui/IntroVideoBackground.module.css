@@ -1,0 +1,118 @@
+/*
+  IntroVideoBackground — cinematic atmospheric video layer.
+
+  Layer stack (bottom → top inside IntroScene .root):
+    z:0  .wrapper        absolute fill, lowest layer
+    z:1  .glow           existing IntroScene ambient glow (DOM order)
+    z:2  h1 / p / etc.  flex items, painted above both absolute layers
+
+  No z-index integers needed: the stacking context created by
+  IntroScene .root (will-change: transform) orders children strictly
+  by DOM position.  .wrapper is inserted as the FIRST child of root,
+  so it naturally sits below .glow and all text.
+
+  Performance notes:
+  - video uses object-fit:cover so the browser never repaints on resize
+  - filter is applied once at the GPU compositor level
+  - will-change: opacity on .wrapper lets the browser pre-promote the
+    layer before IntroScene's root opacity tween begins the exit sweep
+*/
+
+/* ── Outer wrapper — fills the scene root ─────────────────────── */
+
+.wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /*
+    Promote to its own compositor layer.
+    When IntroScene fades its root (via GSAP opacity quickSetter),
+    the browser composites this layer rather than repainting it —
+    zero paint cost during the exit animation.
+  */
+  will-change: opacity;
+}
+
+/* ── Video element ───────────────────────────────────────────────── */
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /*
+    Bias the crop toward the upper portion of the frame.
+    Most cinematic medical footage has strong visual interest
+    in the upper-center third.
+  */
+  object-position: center 30%;
+
+  /*
+    Cinematic medical-ambient grade:
+      saturate(0.55)   pull vivid colours toward cool grey-teal
+      brightness(0.48) dim significantly — the light site (#D9F9FF bg)
+                       needs strong dimming so text stays readable
+      contrast(1.05)   tiny contrast lift to preserve perceived depth
+                       after dimming
+
+    Combined effect: video reads as a soft, desaturated atmospheric
+    layer — mood, not a competing visual.
+  */
+  filter: saturate(0.65) brightness(0.72) contrast(1.05);
+
+  /* Prevent any accidental text-selection or drag events */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Bottom gradient — most important overlay ────────────────────── */
+/*
+  Fades the video into the site's exact background colour (#D9F9FF).
+  Heavy at the bottom where the scroll-hint text sits and where the
+  first Department scene will dissolve in. Transparent in the upper
+  two-thirds so the atmospheric video is visible behind the headline.
+*/
+.gradientBottom {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    #D9F9FF                   0%,
+    rgba(217, 249, 255, 0.90) 12%,
+    rgba(217, 249, 255, 0.65) 28%,
+    rgba(217, 249, 255, 0.28) 48%,
+    rgba(217, 249, 255, 0.08) 65%,
+    transparent               80%
+  );
+  pointer-events: none;
+}
+
+/* ── Top gradient — navbar / top-edge readability ────────────────── */
+/*
+  Very light at the top so the Navbar (fixed, above the canvas) has
+  a clean surface to render against. Fades to transparent quickly.
+*/
+.gradientTop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(217, 249, 255, 0.55) 0%,
+    rgba(217, 249, 255, 0.18) 10%,
+    transparent               28%
+  );
+  pointer-events: none;
+}
+
+/* ── Reduced motion: render nothing ─────────────────────────────── */
+/*
+  Belt-and-suspenders alongside the JS check in useEffect.
+  CSS handles it instantly; JS handles it before React mounts the video.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .wrapper {
+    display: none;
+  }
+}

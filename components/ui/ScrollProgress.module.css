@@ -1,0 +1,132 @@
+/*
+  ScrollProgress — vertical dot navigator.
+
+  Premium upgrades:
+  1. Active dot: dept-accent-colored pill (scaleX: wide) via --dot-color CSS var
+  2. Inactive dots: smaller, lower opacity
+  3. Section label: slides in from the right on :hover via CSS
+  4. Connecting line between dots for visual hierarchy
+*/
+
+.progress {
+  position: fixed;
+  right: clamp(1rem, 2.5vw, 2rem);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: var(--z-raised);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Vertical connecting line */
+.progress::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(159, 161, 255, 0.20) 20%,
+    rgba(159, 161, 255, 0.20) 80%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* ── Dot button ─────────────────────────────────────────────── */
+
+.dotBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  /* Force GPU layer for the label tooltip */
+  isolation: isolate;
+}
+
+/*
+  Section label — slides in from the right on :hover.
+  Uses content: attr(data-label) to read the label from HTML.
+  Pure CSS — zero JavaScript.
+*/
+.dotBtn::before {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  opacity: 0;
+  transition:
+    opacity   0.22s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.dotBtn:hover::before {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ── Dot shape ──────────────────────────────────────────────── */
+
+.dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 100px;
+  background: var(--dot-color, rgba(26, 27, 46, 0.20));
+  will-change: transform, opacity, width;
+  transition:
+    width   0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.35s ease,
+    background 0.35s ease;
+}
+
+/*
+  Active state applied by the component via data-active attribute.
+  The dot widens into a pill shape using the dept's accent color.
+  Both transform and width are GPU-composited on modern browsers.
+*/
+.dot[data-active='true'] {
+  width: 18px;
+  opacity: 1;
+  /* --dot-color set via inline style in ScrollProgress.tsx */
+  background: var(--dot-color, var(--color-accent));
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .progress { display: none; }
+}
+
+/* ── Accessibility ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .dotBtn::before {
+    transition: none;
+  }
+}

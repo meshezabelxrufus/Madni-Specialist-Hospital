@@ -1,0 +1,705 @@
+/* DepartmentScene — two-card layout */
+
+.root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* CSS starts hidden — GSAP sets opacity:1 after first paint to prevent FOUC */
+  opacity: 0;
+}
+
+/*
+  Department background color wash.
+  Three layers (bg + ::before + ::after) composite the ambient dept-hue.
+  GSAP controls the parent opacity; all three fade together.
+*/
+.bg {
+  position: absolute;
+  inset: -5%;
+  will-change: opacity;
+  pointer-events: none;
+
+  background: radial-gradient(
+    ellipse 180% 130% at 70% 50%,
+    var(--dept-accent-08) 0%,
+    transparent 65%
+  );
+}
+
+.bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 75% at 82% 28%,
+    var(--dept-accent-12) 0%,
+    transparent 58%
+  );
+  filter: blur(40px);
+}
+
+.bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    128deg,
+    transparent          0%,
+    var(--dept-accent-08) 45%,
+    transparent          80%
+  );
+  filter: blur(60px);
+}
+
+/* ── Two-card layout grid ──────────────────────────── */
+
+.layout {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  /* 60 / 40 asymmetric split — visual card dominates */
+  grid-template-columns: 60fr 40fr;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(4.5rem, 8vh, 5.5rem) var(--gutter) clamp(2rem, 4vh, 3rem);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── LEFT: Visual Department Card ─────────────────── */
+
+/* Link wrapper — block-level, no underline */
+.visualCardLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  /* Always receives clicks — .root has pointer-events:none for bg layers only */
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 28px;
+}
+
+.visualCard {
+  position: relative;
+  border-radius: 28px;
+  border: 1px solid var(--color-border);
+  /* Dept-tinted gradient background */
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 1) 0%,
+    var(--dept-accent-08) 100%
+  );
+  overflow: hidden;
+  will-change: transform, opacity;
+  pointer-events: none; /* link wrapper handles events */
+  box-shadow:
+    0 6px 40px rgba(159, 161, 255, 0.10),
+    0 1px  6px rgba(0,   0,   0,   0.04);
+  /* Aspect ratio: 4:3 — immersive but not overly tall */
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover: deepen the shadow and tint the border */
+.visualCardLink:hover .visualCard {
+  border-color: rgba(159, 161, 255, 0.35);
+  box-shadow:
+    0 10px 48px rgba(159, 161, 255, 0.18),
+    0 2px  10px rgba(0,   0,   0,   0.06);
+}
+
+/* Subtle dot-grid texture behind the SVG illustration */
+.visualCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    var(--dept-accent-08) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Thin dept-color accent bar along the left edge */
+.visualCard::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 0;
+  width: 2.5px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--dept-accent) 30%,
+    var(--dept-accent) 70%,
+    transparent
+  );
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Department badge — top-left overlay */
+.visualBadge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  padding: 0.3rem 0.75rem;
+}
+
+.visualNum {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--dept-accent);
+}
+
+.visualDot {
+  color: var(--color-text-muted);
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.visualDeptName {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* "View Department →" badge — always visible, dark pill */
+.viewHint {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  z-index: 3;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  padding: 0.35rem 0.875rem;
+  opacity: 0.9;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  pointer-events: none;
+}
+
+.visualCardLink:hover .viewHint {
+  opacity: 1;
+  background: rgba(17, 17, 17, 1);
+}
+
+/* Title link — desktop clickable tagline */
+.titleLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  /* Pointer events controlled via JS (onParallax inline style) */
+}
+
+.titleLink:hover .title {
+  color: var(--dept-accent);
+  transition: color 0.25s ease;
+}
+
+/* "Explore Department" button — dark, always visible */
+.exploreDeptBtn {
+  /* z-index above GSAP force3D compositor layers */
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.125rem;
+  padding: 0.75rem 1.125rem;
+  border-radius: 12px;
+  border: none;
+  background: #111111;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  width: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exploreDeptBtn:hover {
+  background: #2d2f4a;
+  box-shadow: 0 4px 20px rgba(17, 17, 17, 0.25);
+}
+
+.exploreDeptBtn:active {
+  background: #12131f;
+}
+
+/* ── Photo mode ───────────────────────────────────────────────── */
+
+/*
+  next/image with fill renders <img position:absolute;inset:0>.
+  .visualCard already has position:relative + overflow:hidden so
+  no extra wrapper is needed.
+  z-index 0: sits above the ::before dot-grid and ::after accent-bar
+  pseudo-elements (which have no explicit z-index), but below the
+  overlay (z-index 1) and badge (z-index 2).
+*/
+.visualPhoto {
+  object-fit: cover;
+  object-position: center;
+  /* Gentle desaturation — keeps the dept accent colour readable over it */
+  filter: saturate(0.88) brightness(0.92);
+  transition: filter 0.4s ease;
+}
+
+.visualCardLink:hover .visualPhoto {
+  filter: saturate(1.0) brightness(1.0);
+}
+
+/*
+  Cinematic overlay — two layers composited via CSS multi-background:
+    1. Bottom fade  →  dept accent tint (warm / cool depending on dept)
+    2. Top vignette →  dark edge so the badge pill stays readable
+  Uses --dept-accent-20 which is already injected by DepartmentScene
+  as an inline CSS custom property on the root element.
+*/
+.visualPhotoOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    /* Bottom: dept-tinted fade for atmospheric depth */
+    linear-gradient(
+      to top,
+      var(--dept-accent-20) 0%,
+      transparent          55%
+    ),
+    /* Top-left: subtle dark vignette so the badge reads clearly */
+    linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.18) 0%,
+      transparent          45%
+    );
+}
+
+/* SVG illustration wrapper — fills most of the visual card */
+.visualSvgWrap {
+  position: relative;
+  z-index: 1;
+  width: 82%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.visualSvgWrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── RIGHT: Information Card ──────────────────────── */
+
+.infoCard {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  padding: clamp(1.5rem, 2.5vw, 2rem);
+  will-change: transform, opacity;
+  box-shadow:
+    0 4px 24px rgba(159, 161, 255, 0.09),
+    0 1px  4px rgba(0,   0,   0,   0.04);
+  display: flex;
+  flex-direction: column;
+  /* Always receives clicks — opts out of .root pointer-events:none */
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+/* ── Info header: label + title + divider + desc ─── */
+
+.infoHeader {
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.875rem;
+  will-change: transform, opacity;
+}
+
+.num {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--dept-accent);
+}
+
+.dot {
+  color: var(--color-border-light);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.deptName {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  will-change: transform, opacity;
+}
+
+.divider {
+  width: 40px;
+  height: 1.5px;
+  background: var(--dept-accent);
+  opacity: 0.45;
+  margin-bottom: 1rem;
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+.desc {
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 1.1vw, 0.9375rem);
+  font-weight: 300;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+  will-change: transform, opacity;
+}
+
+/* ── Doctor list ──────────────────────────────────── */
+
+.doctorList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid rgba(159, 161, 255, 0.12);
+  padding-top: 1.125rem;
+  margin-top: 1.125rem;
+}
+
+/* Individual doctor entry */
+.doctorEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  will-change: transform, opacity;
+}
+
+/* Separator between multiple doctors */
+.doctorEntry + .doctorEntry {
+  border-top: 1px solid rgba(159, 161, 255, 0.10);
+  padding-top: 1.125rem;
+  margin-top: 1.125rem;
+}
+
+/* Doctor: avatar + name/specialty row */
+.doctorHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.doctorAvatarWrap {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+}
+
+.doctorAvatarSvg {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+
+.doctorMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.doctorSpecialty {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dept-accent);
+  line-height: 1;
+}
+
+.doctorName {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Short description — 2-line clamp */
+.doctorDesc {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Availability */
+.doctorAvail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.availLabel {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.dayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.2rem;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: var(--accent-18, rgba(159, 161, 255, 0.10));
+  border: 1px solid var(--accent-35, rgba(159, 161, 255, 0.25));
+  color: var(--dept-accent);
+}
+
+.oncall {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: rgba(159, 161, 255, 0.10);
+  border: 1px solid rgba(159, 161, 255, 0.28);
+  color: var(--color-accent);
+}
+
+.hours {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.01em;
+}
+
+/* WhatsApp CTA inside info card */
+.doctorCta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 12px;
+  background: #1aaa55;
+  border: 1px solid #168f48;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  cursor: pointer;
+  /* Always clickable — pointer-events:none from .root does not apply
+     because .infoCard (parent) has pointer-events:auto */
+  pointer-events: auto;
+  /* CSS transform for hover/active — replaces Framer Motion whileHover.
+     Pure CSS never measures DOM layout, so it has no cached hit-box offset. */
+  transition: background 0.25s ease, border-color 0.25s ease,
+              box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+
+.doctorCta:hover {
+  background: #128c3b;
+  border-color: #0e7331;
+  box-shadow: 0 4px 16px rgba(18, 140, 59, 0.30);
+  transform: scale(1.02);
+}
+
+.doctorCta:active {
+  transform: scale(0.97);
+  transition-duration: 0.1s;
+}
+
+
+.doctorCtaIcon {
+  flex-shrink: 0;
+}
+
+.doctorCtaArrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.5;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.doctorCta:hover .doctorCtaArrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ── Mobile layout ────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* On mobile the root must scroll to show both doctor cards.
+     overflow:hidden is kept on desktop for parallax clipping. */
+  .root {
+    overflow-y: auto;
+    /* Snap inner scrollbar to avoid a secondary scrollbar UI */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: start;
+    /* Enough top pad to clear the navbar + extra bottom pad for last card */
+    padding: 4.5rem var(--gutter) 3rem;
+    gap: 1rem;
+    /* height:auto so the layout grows to fit 2 doctor cards */
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
+  }
+
+  .visualCard {
+    /* Compact on mobile — keeps photo visible but gives info card more room */
+    aspect-ratio: 4 / 3;
+    max-height: 240px;
+    border-radius: 20px;
+  }
+
+  .visualSvgWrap {
+    width: 70%;
+  }
+
+  .infoCard {
+    border-radius: 20px;
+    padding: 1.25rem;
+    /* Let the info card grow to full height — no clipping */
+    overflow: visible;
+  }
+
+  .title {
+    font-size: clamp(1.375rem, 5vw, 2rem);
+  }
+
+  .bg::before,
+  .bg::after {
+    /* Remove expensive blur on mobile */
+    filter: none;
+  }
+
+  /* On mobile, visual card link captures touch on the whole section */
+  .visualCardLink {
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout {
+    padding: 4rem var(--gutter) 1.5rem;
+    gap: 0.875rem;
+  }
+
+  .visualCard {
+    border-radius: 16px;
+  }
+
+  .infoCard {
+    border-radius: 16px;
+    padding: 1.125rem;
+  }
+}
+
+/* ── Accessibility ────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .doctorCta,
+  .doctorCtaArrow {
+    transition: none;
+  }
+}

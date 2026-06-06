@@ -1,0 +1,254 @@
+/* IntroScene */
+
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 var(--gutter);
+  will-change: transform, opacity;
+  /* CRITICAL: Without this, IntroScene's full-viewport transparent div
+     intercepts ALL pointer events on every scene beneath it in the stack. */
+  pointer-events: none;
+}
+
+/* Ambient periwinkle radial glow behind text */
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 55% at 50% 50%,
+    rgba(174, 226, 255, 0.30) 0%,
+    rgba(159, 161, 255, 0.10) 45%,
+    transparent 70%);
+  pointer-events: none;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+  max-width: 16ch;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Word reveal — each word is masked */
+.wordWrap {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  line-height: 1.15;
+}
+
+.wordWrap [data-word] {
+  display: inline-block;
+  will-change: transform, opacity;
+  /* GSAP timeline animates from this state. Without this, words flash
+     visible for one frame before the paused timeline is first seeked. */
+  opacity: 0;
+  transform: translateY(80px);
+}
+
+.tagline {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 1.4vw, 0.9375rem);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #111111;
+  margin-bottom: 2.5rem;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.divider {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--color-accent), transparent);
+  margin-bottom: 2.5rem;
+  opacity: 0.5;
+}
+
+/* Trust pillars */
+.trust {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-bottom: 3rem;
+}
+
+.pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.pillarValue {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 300;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.pillarLabel {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Separator dots between pillars */
+.trust > .pillar + .pillar {
+  position: relative;
+}
+
+.trust > .pillar + .pillar::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * clamp(1rem, 2.5vw, 2rem));
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0.3;
+}
+
+/* Scroll hint */
+.hint {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  will-change: opacity;
+  opacity: 0;
+}
+
+.arrow {
+  display: inline-block;
+  animation: bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(5px); }
+}
+
+/* ── Scroll indicator — visible at zero scroll ───────────────── */
+/*
+  Absolutely positioned so it never disturbs the flex layout.
+  Starts at opacity:1 (no GSAP hidden state) and is faded to 0
+  by the onParallax quickSetter as soon as the user scrolls.
+*/
+
+/*
+  Scroll indicator — centred in the viewport at zero scroll.
+
+  WHY top:50% / left:50% instead of bottom:
+    At p=0 every text element is opacity:0 (gsap.set hides them all
+    before the first frame).  The screen centre is completely empty,
+    so the indicator can own it without overlapping anything.
+    It fades to 0 by p=0.15 — gone before any text starts to reveal.
+
+  WHY white colours:
+    The centre of the viewport sits directly on the video at p=0.
+    The gradient fade only runs at the very bottom edge.
+    White text / line / dot are clearly legible against the dimmed video.
+*/
+
+.scrollIndicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.125rem;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.scrollLabel {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.90);
+  white-space: nowrap;
+}
+
+/* The vertical track */
+.scrollLine {
+  width: 2px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.22);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+/* The travelling dot */
+.scrollDot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 26px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.95) 35%,
+    rgba(255, 255, 255, 0.95) 65%,
+    transparent
+  );
+  animation: scrollDrop 1.9s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes scrollDrop {
+  0%   { transform: translateY(-26px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(80px);  opacity: 0; }
+}
+
+/* Reduced motion: freeze the dot mid-track, keep the indicator visible */
+@media (prefers-reduced-motion: reduce) {
+  .scrollDot {
+    animation: none;
+    transform: translateY(27px);
+    opacity: 0.6;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .trust {
+    gap: 1.5rem;
+  }
+
+  .name {
+    font-size: clamp(2rem, 10vw, 3.5rem);
+  }
+}

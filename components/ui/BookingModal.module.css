@@ -1,0 +1,440 @@
+/*
+  BookingModal — WhatsApp appointment booking flow.
+
+  Rendered into document.body via React Portal, so z-index
+  and positioning are relative to the viewport, not the canvas.
+
+  Desktop:  centered, max-width 520px, frosted glass
+  Mobile:   full-width bottom sheet, slides up from bottom
+*/
+
+/* ── Backdrop ────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(26, 27, 46, 0.45);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  cursor: pointer;
+}
+
+/* ── Centering container ─────────────────────────────────────── */
+/*
+  Wraps the modal and provides viewport-relative flex centering.
+  Using a flex container instead of transform: translate(-50%, -50%)
+  is the only approach that coexists with Framer Motion's transform
+  system — Framer Motion writes its own inline transform for y/scale
+  animations, which would overwrite any CSS centering transform on the
+  modal element itself.
+*/
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 1rem padding prevents the modal from touching the edge on narrow screens */
+  padding: 1rem;
+  /*
+    pointer-events: none lets outside-modal clicks fall through to the
+    backdrop (z-index 999) which has the onClick → onClose handler.
+    The modal itself re-enables pointer events via pointer-events: auto.
+  */
+  pointer-events: none;
+}
+
+/* ── Modal shell ─────────────────────────────────────────────── */
+
+.modal {
+  /*
+    position: relative — NOT fixed.
+    The container (position: fixed; flex) handles viewport anchoring.
+    relative is needed so the absolutely-positioned close button and
+    accent line are scoped to the modal box, not the viewport.
+  */
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+
+  /* Re-enable pointer events inside the pointer-events:none container */
+  pointer-events: auto;
+
+  /* Premium white glass */
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  border: 1px solid rgba(159, 161, 255, 0.20);
+  border-radius: 28px;
+  box-shadow:
+    0  8px 40px rgba(159, 161, 255, 0.14),
+    0  2px  8px rgba(0,   0,   0,   0.05),
+    0  1px  0   rgba(255, 255, 255, 0.90) inset;
+
+  padding: 2rem 2rem 1.75rem;
+
+  /* Scrollbar — thin, matches the site design */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(159, 161, 255, 0.25) transparent;
+
+  /* Framer Motion animates y / scale / opacity on this element */
+  will-change: transform, opacity;
+}
+
+/* Mobile: bottom sheet */
+@media (max-width: 600px) {
+  /* Anchor to viewport bottom, no side padding */
+  .container {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+    padding: 1.75rem 1.5rem 2rem;
+
+    /*
+      Lighter blur on mobile — expensive to composite over a large panel.
+      More opaque white background compensates visually.
+    */
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    background: rgba(255, 255, 255, 0.99);
+  }
+
+  /*
+    Slightly stronger backdrop on mobile — removes blur for cost savings,
+    uses semi-opaque navy overlay to focus on the modal.
+  */
+  .backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(26, 27, 46, 0.60);
+  }
+}
+
+/* ── Top accent line ─────────────────────────────────────────── */
+
+.accentLine {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--modal-accent) 30%,
+    var(--modal-accent) 70%,
+    transparent
+  );
+  opacity: 0.75;
+  border-radius: 0 0 3px 3px;
+  pointer-events: none;
+}
+
+/* ── Doctor context row ──────────────────────────────────────── */
+
+.doctorRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.deptLabel {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--modal-accent);
+  margin-bottom: 0.2rem;
+}
+
+.doctorName {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.availability {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  margin-top: 0.25rem;
+  letter-spacing: 0.01em;
+}
+
+/* ── Divider ─────────────────────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(159, 161, 255, 0.18) 20%,
+    rgba(159, 161, 255, 0.18) 80%,
+    transparent
+  );
+  margin-bottom: 1.5rem;
+}
+
+/* ── Form ────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.375rem, 3vw, 1.625rem);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+/* Two fields side by side on desktop */
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.875rem;
+}
+
+@media (max-width: 480px) {
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Individual field */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.optional {
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.6;
+}
+
+/* Inputs + textarea */
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(159, 161, 255, 0.22);
+  background: rgba(217, 249, 255, 0.25);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+}
+
+.input::placeholder {
+  color: rgba(26, 27, 46, 0.32);
+}
+
+/* Number input — hide spinners */
+.input[type='number']::-webkit-inner-spin-button,
+.input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  border-color: var(--modal-accent);
+  background: rgba(255, 255, 255, 0.80);
+  box-shadow: 0 0 0 3px var(--modal-accent-20);
+}
+
+.inputError {
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+.inputError:focus {
+  border-color: rgba(239, 68, 68, 0.8);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.errorMsg {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  color: rgba(252, 165, 165, 0.9);
+  letter-spacing: 0.01em;
+}
+
+/* ── Message preview ─────────────────────────────────────────── */
+
+.preview {
+  background: rgba(217, 249, 255, 0.35);
+  border: 1px solid rgba(159, 161, 255, 0.18);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.previewLabel {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--modal-accent);
+  margin-bottom: 0.625rem;
+}
+
+.previewText {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+
+  /* Keep to max 8 lines */
+  max-height: 9rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* ── Actions ─────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.cancelBtn {
+  flex: 0 0 auto;
+  padding: 0.8125rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(159, 161, 255, 0.20);
+  background: rgba(159, 161, 255, 0.06);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.cancelBtn:hover {
+  background: rgba(159, 161, 255, 0.12);
+  border-color: rgba(159, 161, 255, 0.35);
+  color: var(--color-text-primary);
+}
+
+.submitBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5625rem;
+  padding: 0.8125rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(37, 211, 102, 0.28);
+  background: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+  will-change: transform;
+}
+
+.submitBtn:hover {
+  background: rgba(37, 211, 102, 0.18);
+  border-color: rgba(37, 211, 102, 0.45);
+  box-shadow: 0 0 24px rgba(37, 211, 102, 0.2);
+}
+
+.submitBtn:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Sent state */
+.submitSent {
+  background: rgba(37, 211, 102, 0.18);
+  border-color: rgba(37, 211, 102, 0.45);
+  color: #25d366;
+}
+
+/* ── Close button ─────────────────────────────────────────────── */
+
+.closeBtn {
+  position: absolute;
+  top: 1.125rem;
+  right: 1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(159, 161, 255, 0.20);
+  background: rgba(159, 161, 255, 0.06);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.closeBtn:hover {
+  background: rgba(159, 161, 255, 0.14);
+  border-color: rgba(159, 161, 255, 0.35);
+  color: var(--color-text-primary);
+}
+
+/* ── Accessibility ────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .input,
+  .cancelBtn,
+  .submitBtn,
+  .closeBtn {
+    transition: none;
+  }
+}

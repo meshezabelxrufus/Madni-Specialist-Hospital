@@ -1,0 +1,386 @@
+/*
+  DoctorCard — Premium Apple Health–style glassmorphism card.
+
+  Layer stack (bottom → top):
+    z:0  .glow          radial dept-color bloom, CSS transition
+    z:1  .accentLine    1.5px gradient line at the very top
+    z:2  everything else (header, desc, avail, cta)
+
+  No layout-shifting animations — only transform + opacity.
+  Float and hover are handled by Framer Motion (inline transforms).
+  Glow and accentLine changes are driven by CSS :hover transitions
+  so they stay on the compositor thread, never triggering repaints.
+*/
+
+/* ── Card shell ─────────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 296px;
+  padding: 1.875rem 1.625rem 1.625rem;
+  border-radius: 28px;
+
+  /* Premium white surface */
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+
+  /* Thin border + soft elevation */
+  border: 1px solid rgba(159, 161, 255, 0.18);
+  box-shadow:
+    0  4px 24px rgba(159, 161, 255, 0.10),
+    0  1px  6px rgba(0, 0, 0, 0.04),
+    0  1px  0   rgba(255, 255, 255, 0.80) inset;
+
+  /* Stacking context — keeps .glow behind all content */
+  isolation: isolate;
+  overflow: hidden;
+
+  /* GPU layer — Framer Motion mutates transform directly */
+  will-change: transform;
+  backface-visibility: hidden;
+
+  /* Allow link/button interaction inside the scene's pointer-events:none wrapper */
+  pointer-events: auto;
+  cursor: default;
+}
+
+/* ── Ambient glow (CSS hover — compositor only) ─────────────── */
+
+.glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+
+  /* Dept-color radial bloom from above the card */
+  background: radial-gradient(
+    ellipse 72% 50% at 50% -8%,
+    var(--accent-35) 0%,
+    transparent 68%
+  );
+
+  opacity: 0;
+  transition: opacity 0.55s ease;
+  pointer-events: none;
+}
+
+.card:hover .glow {
+  opacity: 1;
+}
+
+/* ── Top accent line ─────────────────────────────────────────── */
+
+.accentLine {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1.5px;
+  z-index: 1;
+
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent)    30%,
+    var(--accent)    70%,
+    transparent 100%
+  );
+
+  /* Subtle pulse on card hover */
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+
+.card:hover .accentLine {
+  opacity: 0.9;
+}
+
+/* Ensure all card body elements sit above the glow */
+.header,
+.divider,
+.desc,
+.avail,
+.cta {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.125rem;
+}
+
+/* Avatar */
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 62px;
+  height: 62px;
+}
+
+.avatarSvg {
+  display: block;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+}
+
+/*
+  Glowing ring around avatar — appears on :hover.
+  Rendered as a CSS pseudo-element-equivalent span.
+*/
+.avatarRing {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  opacity: 0;
+  transition: opacity 0.45s ease, box-shadow 0.45s ease;
+  pointer-events: none;
+}
+
+.card:hover .avatarRing {
+  opacity: 0.55;
+  box-shadow: 0 0 12px var(--accent-35);
+}
+
+/* Identity text */
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;  /* Allow text to truncate */
+}
+
+.specialty {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;  /* 9px */
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.0625rem, 1.9vw, 1.3125rem);
+  line-height: 1.2;
+  letter-spacing: -0.018em;
+  color: var(--color-text-primary);
+
+  /* Prevent very long names from breaking layout */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Divider ─────────────────────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  margin-bottom: 1rem;
+  background: linear-gradient(
+    90deg,
+    transparent              0%,
+    rgba(159, 161, 255, 0.18) 15%,
+    rgba(159, 161, 255, 0.18) 85%,
+    transparent              100%
+  );
+}
+
+/* ── Description ─────────────────────────────────────────────── */
+
+.desc {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 300;
+  line-height: 1.72;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.25rem;
+
+  /* Clamp at 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Availability ─────────────────────────────────────────────── */
+
+.avail {
+  margin-bottom: 1.375rem;
+}
+
+.availLabel {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.dayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Day / Daily badge */
+.badge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.575rem;
+  border-radius: 100px;
+  background: var(--accent-18);
+  border: 1px solid var(--accent-35);
+  color: var(--accent);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card:hover .badge {
+  background: var(--accent-35);
+}
+
+/* On-call badge — primary accent color */
+.oncall {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.65rem;
+  border-radius: 100px;
+  background: rgba(159, 161, 255, 0.10);
+  border: 1px solid rgba(159, 161, 255, 0.28);
+  color: var(--color-accent);
+}
+
+.hours {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.01em;
+}
+
+/* ── WhatsApp CTA ─────────────────────────────────────────────── */
+
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  width: 100%;
+  padding: 0.8125rem 1.125rem;
+  border-radius: 14px;
+  text-decoration: none;
+  cursor: pointer;
+
+  /* WhatsApp green glass */
+  background: rgba(37, 211, 102, 0.09);
+  border: 1px solid rgba(37, 211, 102, 0.20);
+
+  color: #25d366;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+
+  /* GPU-only hover transitions (no layout change) */
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+  /* Scale handled by Framer Motion whileHover */
+  will-change: transform;
+}
+
+.cta:hover {
+  background: rgba(37, 211, 102, 0.16);
+  border-color: rgba(37, 211, 102, 0.38);
+  box-shadow: 0 0 28px rgba(37, 211, 102, 0.18);
+}
+
+/* WhatsApp icon */
+.ctaIcon {
+  flex-shrink: 0;
+}
+
+/* Arrow — pushed to the right */
+.ctaArrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.55;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.cta:hover .ctaArrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    border-radius: 22px;
+    padding: 1.625rem 1.375rem 1.375rem;
+
+    /*
+      Reduce backdrop-filter intensity on mobile.
+      blur(32px) is expensive on large animated backgrounds.
+      Halving the radius preserves the frosted-glass look at
+      arm's-length while cutting compositing cost significantly.
+    */
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+
+    /* Lighter shadow stack */
+    box-shadow:
+      0 2px 12px rgba(159, 161, 255, 0.10),
+      0 1px 0   rgba(255, 255, 255, 0.70) inset;
+  }
+
+  .name {
+    white-space: normal;
+  }
+
+  /*
+    WhatsApp CTA — primary action on mobile.
+    min-height: 52px meets Apple HIG / Material Design tap target guidelines.
+    Ensures the button is comfortably tappable with a thumb at any size.
+  */
+  .cta {
+    min-height: 52px;
+    padding: 0.9375rem 1.125rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* ── Accessibility ────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .glow,
+  .accentLine,
+  .badge,
+  .avatarRing,
+  .cta,
+  .ctaArrow {
+    transition: none;
+  }
+}

@@ -1,0 +1,245 @@
+/* DeptHero — full-viewport hero section */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding-top: 4.5rem; /* clear fixed navbar */
+}
+
+/* Ambient dept-accent gradient behind everything */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 80% 50%, var(--dept-accent-08, rgba(159,161,255,0.08)) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(174, 226, 255, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Two-column grid: 55% text / 45% visual */
+.heroInner {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  align-items: center;
+  gap: clamp(2rem, 4vw, 4rem);
+  width: 100%;
+  max-width: var(--max-width, 1400px);
+  margin: 0 auto;
+  padding: clamp(3rem, 6vh, 5rem) var(--gutter, clamp(1.5rem, 5vw, 5rem));
+}
+
+/* ── Text column ──────────────────────────────────── */
+
+.textCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Back link */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--dept-accent, var(--color-accent));
+}
+
+/* Dept badge pill */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dept-accent, var(--color-accent));
+  background: var(--dept-accent-08, rgba(159,161,255,0.08));
+  border: 1px solid var(--dept-accent-20, rgba(159,161,255,0.2));
+  border-radius: 100px;
+  padding: 0.35rem 1rem;
+  width: fit-content;
+}
+
+/* Large italic tagline */
+.tagline {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2.25rem, 5.5vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--color-text-primary);
+  max-width: 18ch;
+}
+
+/* Overview paragraph */
+.overview {
+  font-family: var(--font-sans);
+  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  max-width: 54ch;
+}
+
+/* Scroll hint */
+.scrollHint {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.scrollLine {
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+/* ── Visual column ────────────────────────────────── */
+
+.visualCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visualCard {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    148deg,
+    rgba(255, 255, 255, 1) 0%,
+    var(--dept-accent-08, rgba(159,161,255,0.08)) 100%
+  );
+  overflow: hidden;
+  box-shadow:
+    0 8px 48px rgba(159, 161, 255, 0.12),
+    0 2px  8px rgba(0,   0,   0,   0.05);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dot-grid texture */
+.visualDotGrid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    var(--dept-accent-08, rgba(159,161,255,0.08)) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Left accent bar */
+.visualAccentBar {
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 0;
+  width: 2.5px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--dept-accent, var(--color-accent)) 30%,
+    var(--dept-accent, var(--color-accent)) 70%,
+    transparent
+  );
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* SVG wrapper */
+.visualSvg {
+  position: relative;
+  z-index: 1;
+  width: 82%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.visualSvg svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .textCol {
+    order: 2;
+    gap: 1.25rem;
+  }
+
+  .visualCol {
+    order: 1;
+  }
+
+  .visualCard {
+    aspect-ratio: 16 / 9;
+    border-radius: 20px;
+  }
+
+  .tagline {
+    font-size: clamp(2rem, 6vw, 3rem);
+    max-width: none;
+  }
+
+  .scrollHint {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroInner {
+    padding-top: 2rem;
+  }
+
+  .visualCard {
+    border-radius: 16px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .scrollLine {
+    animation: none;
+  }
+}

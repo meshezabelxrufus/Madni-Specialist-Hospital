@@ -1,0 +1,178 @@
+/* About page — matches the site's light cinematic aesthetic */
+
+.page {
+  min-height: 100svh;
+  background: var(--color-bg);
+  padding-top: 5rem; /* clear fixed Navbar */
+}
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+
+.hero {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 3rem var(--gutter) 2.5rem;
+  text-align: center;
+}
+
+.label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 1.125rem;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.tagline {
+  font-family: var(--font-sans);
+  font-size: clamp(0.875rem, 1.4vw, 1rem);
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+  max-width: 52ch;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Hospital photo ───────────────────────────────────────────── */
+
+.photoWrap {
+  max-width: var(--max-width);
+  margin: 0 auto 3.5rem;
+  padding: 0 var(--gutter);
+}
+
+.photoCard {
+  position: relative;
+  width: 100%;
+  /* 16:9 on wide screens, taller on mobile */
+  aspect-ratio: 16 / 9;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 8px 40px rgba(159, 161, 255, 0.12),
+    0 2px  8px rgba(0, 0, 0, 0.04);
+}
+
+.photo {
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Subtle dept-tinted gradient at the bottom of the photo */
+.photoGradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(217, 249, 255, 0.60) 0%,
+    rgba(217, 249, 255, 0.15) 30%,
+    transparent               60%
+  );
+  pointer-events: none;
+}
+
+/* ── Info grid ────────────────────────────────────────────────── */
+
+.infoGrid {
+  max-width: var(--max-width);
+  margin: 0 auto 4rem;
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 1.75rem 1.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  box-shadow:
+    0 2px 16px rgba(159, 161, 255, 0.08),
+    0 1px  3px rgba(0, 0, 0, 0.03);
+}
+
+.cardLabel {
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.cardIcon {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.iconWrap {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--color-accent);
+  opacity: 0.75;
+}
+
+.cardText {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+.cardText strong {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* WhatsApp link */
+.waLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1aaa55;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.waLink:hover {
+  color: #128c3b;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .photoCard {
+    aspect-ratio: 4 / 3;
+    border-radius: 20px;
+  }
+
+  .card {
+    border-radius: 16px;
+    padding: 1.375rem 1.25rem;
+  }
+}

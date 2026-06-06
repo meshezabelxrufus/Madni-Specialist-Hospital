@@ -13,6 +13,14 @@
   /* CRITICAL: Without this, IntroScene's full-viewport transparent div
      intercepts ALL pointer events on every scene beneath it in the stack. */
   pointer-events: none;
+  /* Mobile hero fallback — visible when video is skipped on touch devices.
+     Creates ambient depth without the video decode cost. */
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 30%,
+    rgba(174, 226, 255, 0.45) 0%,
+    rgba(159, 161, 255, 0.20) 45%,
+    var(--color-bg) 75%
+  );
 }
 
 /* Ambient periwinkle radial glow behind text */
@@ -250,5 +258,31 @@
 
   .name {
     font-size: clamp(2rem, 10vw, 3.5rem);
+  }
+}
+
+/* ── Mobile performance ───────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Disable continuous CSS animations — they run forever consuming GPU
+     even after the user has scrolled completely past the intro scene. */
+  .arrow {
+    animation: none;
+  }
+  .scrollDot {
+    animation: none;
+    transform: translateY(27px);
+    opacity: 0.5;
+  }
+
+  /* On mobile the video is hidden — the root gradient IS the background.
+     On desktop the gradient is invisible behind the video. */
+  .glow {
+    /* Boost the glow opacity on mobile to compensate for no video */
+    opacity: 0.6 !important;
+  }
+
+  /* Simplify name text — reduce overflow:hidden per-word wrappers cost */
+  .wordWrap {
+    overflow: visible;
   }
 }

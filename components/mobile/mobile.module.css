@@ -1,0 +1,567 @@
+/**
+ * Mobile Layout Styles
+ * -------------------------------------------------
+ * Complete mobile-first layout.
+ * No GSAP, no sticky canvas, no parallax.
+ *
+ * Animation system:
+ *   All animated elements start hidden via .fade-in class.
+ *   IntersectionObserver (useFadeIn) adds .mobile-visible class.
+ *   CSS transitions handle the actual animation.
+ *
+ * Duration: 0.36s = desktop 0.6s × 0.6 (40% reduction)
+ */
+
+/* ── Page wrapper ───────────────────────────────────── */
+.mobilePage {
+  min-height: 100svh;
+  background: var(--color-bg);
+}
+
+/* ── Shared section base ────────────────────────────── */
+.section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 5rem var(--gutter) 3rem;
+}
+
+/* ── Shared fade-in animation system ────────────────── */
+/* Elements start hidden, .mobile-visible triggers the transition */
+:global(.fade-in) {
+  opacity: 0;
+  transform: translateY(28px);
+  /* 40% faster than desktop durations (0.6s → 0.36s) */
+  transition: opacity 0.36s ease-out, transform 0.36s ease-out;
+}
+
+:global(.fade-in.mobile-visible) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered children delay */
+:global(.fade-in:nth-child(2)) { transition-delay: 0.06s; }
+:global(.fade-in:nth-child(3)) { transition-delay: 0.12s; }
+:global(.fade-in:nth-child(4)) { transition-delay: 0.18s; }
+:global(.fade-in:nth-child(5)) { transition-delay: 0.24s; }
+
+/* Scale variant for hero */
+:global(.fade-in-scale) {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.36s ease-out, transform 0.36s ease-out;
+}
+:global(.fade-in-scale.mobile-visible) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ══════════════════════════════════════════════════════
+   HERO SECTION
+   ══════════════════════════════════════════════════════ */
+
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5rem var(--gutter) 4rem;
+  position: relative;
+  /* Static cinematic gradient — replaces video on mobile */
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 20%,
+      rgba(174, 226, 255, 0.60) 0%,
+      rgba(123, 126, 245, 0.15) 50%,
+      transparent 75%),
+    var(--color-bg);
+}
+
+.heroLabel {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 1.25rem;
+}
+
+.heroName {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2.25rem, 9vw, 3.75rem);
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: var(--color-text-primary);
+  margin-bottom: 1.25rem;
+  max-width: 14ch;
+}
+
+.heroTagline {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 2.5rem;
+}
+
+.heroDivider {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--color-accent), transparent);
+  margin: 0 auto 2.5rem;
+  opacity: 0.5;
+}
+
+.heroTrust {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.heroPillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.heroPillarValue {
+  font-family: var(--font-serif);
+  font-size: clamp(1.375rem, 5vw, 2rem);
+  font-weight: 300;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.heroPillarLabel {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.heroPillarSep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0.3;
+  align-self: center;
+}
+
+.heroScrollHint {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ══════════════════════════════════════════════════════
+   DEPARTMENT SECTIONS
+   ══════════════════════════════════════════════════════ */
+
+.deptSection {
+  min-height: 100svh;
+  padding: 4.5rem var(--gutter) 3rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* Accent tint background — matches desktop dept scene color */
+  background:
+    radial-gradient(
+      ellipse 140% 60% at 70% 20%,
+      var(--dept-accent-08, rgba(159,161,255,0.08)) 0%,
+      transparent 65%
+    ),
+    var(--color-bg);
+}
+
+/* Department number badge */
+.deptBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Department photo / visual */
+.deptImage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-bg-elevated);
+  /* Subtle accent tint border */
+  box-shadow:
+    0 0 0 1px rgba(123, 126, 245, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.deptImagePhoto {
+  object-fit: cover;
+  object-position: center;
+}
+
+.deptSvgWrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* Department info */
+.deptTitle {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.deptTagline {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.deptDescription {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+/* Doctor cards row */
+.deptDoctors {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.deptDoctorCard {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(123, 126, 245, 0.12);
+  border-radius: 14px;
+}
+
+.deptDoctorAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--dept-accent-08, rgba(123, 126, 245, 0.10));
+  border: 1px solid var(--dept-accent-20, rgba(123, 126, 245, 0.20));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+.deptDoctorInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.deptDoctorName {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deptDoctorSpec {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Book appointment button */
+.deptBookBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 100px;
+  background: rgba(37, 211, 102, 0.18);
+  border: 1.5px solid rgba(37, 211, 102, 0.45);
+  color: #179848;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  /* Faster transition on mobile */
+  transition: background 0.2s, border-color 0.2s;
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.deptBookBtn:active {
+  background: rgba(37, 211, 102, 0.28);
+  border-color: rgba(37, 211, 102, 0.65);
+}
+
+/* ══════════════════════════════════════════════════════
+   SUPPORT SECTION
+   ══════════════════════════════════════════════════════ */
+
+.supportSection {
+  padding: 4.5rem var(--gutter) 3rem;
+  background:
+    radial-gradient(ellipse 120% 50% at 50% 40%,
+      rgba(174, 226, 255, 0.25) 0%,
+      transparent 70%),
+    var(--color-bg);
+}
+
+.supportLabel {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.supportTitle {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.625rem, 6.5vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: 2rem;
+}
+
+.supportCards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.supportCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.125rem;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(123, 126, 245, 0.12);
+  border-radius: 16px;
+}
+
+.supportAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(123, 126, 245, 0.10);
+  border: 1px solid rgba(123, 126, 245, 0.20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+.supportCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.supportRole {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.supportName {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.supportDesc {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ══════════════════════════════════════════════════════
+   BOOKING / CTA SECTION
+   ══════════════════════════════════════════════════════ */
+
+.bookingSection {
+  min-height: 60svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem var(--gutter) 4rem;
+  background:
+    radial-gradient(ellipse 130% 80% at 50% 50%,
+      rgba(37, 211, 102, 0.08) 0%,
+      transparent 65%),
+    var(--color-bg);
+  position: relative;
+}
+
+.bookingBadge {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.bookingTitle {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(1.875rem, 7.5vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.bookingSub {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-width: 34ch;
+  margin: 0 auto 2rem;
+}
+
+.bookingCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 100px;
+  background: rgba(37, 211, 102, 0.22);
+  border: 1.5px solid rgba(37, 211, 102, 0.55);
+  color: #179848;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  margin-bottom: 2.5rem;
+}
+
+.bookingCta:active {
+  background: rgba(37, 211, 102, 0.32);
+  border-color: rgba(37, 211, 102, 0.75);
+}
+
+.bookingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.bookingInfoItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid rgba(123, 126, 245, 0.12);
+}
+
+.bookingInfoItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.bookingInfoLabel {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.bookingInfoValue {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  text-align: right;
+}

@@ -456,6 +456,34 @@ html.lenis body {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
   }
+
+  /*
+    MOBILE GPU OPTIMISATION — strip all will-change hints.
+
+    `will-change: transform` / `will-change: opacity` tells the browser
+    "promote this element to its own GPU compositor layer NOW." On a phone
+    with 2–4 GB RAM shared between CPU and GPU, having 30+ promoted layers
+    (every scene bg, every card, every animation target) exhausts VRAM
+    and causes the compositor to swap layers to system RAM — this is the
+    source of the stuttery, sluggish scroll on mobile.
+
+    Setting will-change:auto globally on mobile reverts every element back
+    to the default compositing model. The browser still composites during
+    active animations — it just doesn't keep a permanent layer alive.
+    Net result: smoother scroll, lower memory pressure, cooler device.
+  */
+  *,
+  *::before,
+  *::after {
+    will-change: auto !important;
+    backface-visibility: visible !important;
+  }
+
+  /* Reduce all backdrop-filter blur on mobile — 20px costs ~5ms/frame */
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 /* ----------------------------------------------------------

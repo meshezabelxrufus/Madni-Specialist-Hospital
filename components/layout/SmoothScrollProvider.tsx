@@ -91,25 +91,44 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null)
 
   useEffect(() => {
-    // ── 1. Create Lenis ──────────────────────────────────────
+    // ── Device check ─────────────────────────────────────────────
     const isMobile = window.matchMedia('(max-width: 768px)').matches
-    const lenis = new Lenis(isMobile ? LENIS_OPTIONS_MOBILE : LENIS_OPTIONS)
+    const isTouch  = navigator.maxTouchPoints > 0
+
+    // On mobile/touch devices: skip Lenis entirely.
+    // Native iOS/Android momentum scroll is hardware-accelerated in the GPU
+    // compositor — it cannot be matched by JS-driven interpolation and any
+    // attempt to intercept it causes jank. GSAP ScrollTrigger works perfectly
+    // with native scroll via window.scrollY.
+    if (isMobile || isTouch) {
+      // Still wire ScrollTrigger to native scroll events
+      const onNativeScroll = () => ScrollTrigger.update()
+      window.addEventListener('scroll', onNativeScroll, { passive: true })
+      // Small delay so fonts/images are measured correctly
+      const initTimer = setTimeout(() => ScrollTrigger.refresh(), 300)
+      return () => {
+        window.removeEventListener('scroll', onNativeScroll)
+        clearTimeout(initTimer)
+      }
+    }
+
+    // ── Desktop only: Lenis smooth scroll ────────────────────────
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.85,
+      infinite: false,
+    })
     lenisRef.current = lenis
 
-    // ── 2. Drive Lenis via GSAP ticker ───────────────────────
-    // Both Lenis and GSAP update in the same animation frame —
-    // no de-sync, no jitter on scroll-triggered animations.
     const onTick = (time: number) => lenis.raf(time * 1000)
     gsap.ticker.add(onTick)
 
-    // ── 3. Tell ScrollTrigger to update on every Lenis scroll ─
-    // Called with no arguments so GSAP updates ALL triggers
-    // unconditionally (passing a Lenis event object causes GSAP 3.12+
-    // to skip triggers whose scroller doesn't match the event target).
     const onScroll = () => ScrollTrigger.update()
     lenis.on('scroll', onScroll)
 
-    // ── 4. Refresh on resize (debounced) ─────────────────────
+    // ── 4. Refresh on resize (debounced) ─────────────────────────
     let resizeTimer: ReturnType<typeof setTimeout>
     const onResize = () => {
       clearTimeout(resizeTimer)
@@ -117,9 +136,6 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     }
     window.addEventListener('resize', onResize)
 
-    // ── 5. Initial refresh ────────────────────────────────────
-    // Fonts + images may not have loaded yet. Refresh after a short
-    // delay so ScrollTrigger measures the correct document height.
     const initTimer = setTimeout(() => ScrollTrigger.refresh(), 200)
 
     return () => {

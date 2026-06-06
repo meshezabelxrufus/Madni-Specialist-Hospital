@@ -56,13 +56,20 @@ export function IntroVideoBackground({ videoRef }: IntroVideoBackgroundProps) {
 
   useEffect(() => {
     // ── Accessibility gate ───────────────────────────────────────
-    // prefers-reduced-motion: do not render any motion at all.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    // ── Low-end device gate ──────────────────────────────────────
-    // Devices with ≤ 2 logical CPU cores struggle to decode video
-    // alongside GSAP ScrollTrigger + Framer Motion + Lenis at 60fps.
-    // Skipping the video on these devices prevents dropped frames.
+    // ── Mobile / touch gate ──────────────────────────────────────
+    // Skip video on ALL touch devices (phones + tablets).
+    // Reasons:
+    //  1. Video decoding competes with GSAP/ScrollTrigger for GPU time → jank
+    //  2. Mobile browsers throttle background video to save battery
+    //  3. The cinematic effect is lost on small screens anyway
+    //  4. Data cost — the video is ~15MB on a mobile plan
+    const isTouch   = navigator.maxTouchPoints > 0
+    const isMobile  = window.matchMedia('(max-width: 768px)').matches
+    if (isTouch || isMobile) return
+
+    // ── Low-end desktop gate ─────────────────────────────────────
     if (navigator.hardwareConcurrency <= 2) return
 
     setMounted(true)

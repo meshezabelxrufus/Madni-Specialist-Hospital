@@ -650,6 +650,9 @@
     aspect-ratio: 4 / 3;
     max-height: 240px;
     border-radius: 20px;
+    /* Remove GPU compositor layer — not needed on mobile */
+    will-change: auto;
+    backface-visibility: visible;
   }
 
   .visualSvgWrap {
@@ -661,10 +664,19 @@
     padding: 1.25rem;
     /* Let the info card grow to full height — no clipping */
     overflow: visible;
+    /* Reduce backdrop-filter cost on mobile (20px → 8px) */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    will-change: auto;
   }
 
   .title {
     font-size: clamp(1.375rem, 5vw, 2rem);
+  }
+
+  .bg {
+    /* Remove the will-change GPU layer from bg — saves mobile VRAM */
+    will-change: auto;
   }
 
   .bg::before,
@@ -676,6 +688,12 @@
   /* On mobile, visual card link captures touch on the whole section */
   .visualCardLink {
     border-radius: 20px;
+    will-change: auto;
+  }
+
+  /* Doctor cards — strip GPU layers */
+  .doctorCard {
+    will-change: auto;
   }
 }
 

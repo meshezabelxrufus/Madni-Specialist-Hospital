@@ -520,3 +520,40 @@ html.lenis body {
   background: var(--color-accent);
   opacity: 0.45;
 }
+
+/* ----------------------------------------------------------
+   14. MOBILE FADE-IN ANIMATION SYSTEM
+   Used by MobilePage — applied as plain className strings,
+   triggered by IntersectionObserver (useFadeIn hook).
+   Duration: 0.36s = 40% faster than the desktop GSAP durations.
+   ---------------------------------------------------------- */
+
+/* Base hidden state */
+.fade-in {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.36s ease-out, transform 0.36s ease-out;
+}
+
+/* IO adds this class when element enters viewport */
+.fade-in.mobile-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger siblings by index */
+.fade-in:nth-child(2) { transition-delay: 0.06s; }
+.fade-in:nth-child(3) { transition-delay: 0.12s; }
+.fade-in:nth-child(4) { transition-delay: 0.18s; }
+.fade-in:nth-child(5) { transition-delay: 0.24s; }
+
+/* Scale variant — hero section entry */
+.fade-in-scale {
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.36s ease-out, transform 0.36s ease-out;
+}
+.fade-in-scale.mobile-visible {
+  opacity: 1;
+  transform: scale(1);
+}

@@ -48,21 +48,31 @@ const inter = Inter({
    ---------------------------------------------------------- */
 export const metadata: Metadata = {
   title: {
-    default: 'MediCinema — World-Class Medical Care',
-    template: '%s | MediCinema Hospital',
+    default: 'Madni Specialist Hospital & Trauma Centre',
+    template: '%s | Madni Specialist Hospital',
   },
   description:
-    'Experience world-class medical care in cardiology, neurology, and orthopedics. Book your appointment instantly via WhatsApp.',
+    'Madni Specialist Hospital & Trauma Centre in Jalalpur Jattan offers expert care in Pediatrics, Surgery, ENT, Orthopedics, Gynecology, Dermatology and Cardiology. Book your appointment instantly via WhatsApp.',
   keywords: [
-    'hospital', 'cardiology', 'neurology', 'orthopedics',
-    'medical care', 'doctors', 'appointment', 'WhatsApp booking',
+    'Madni Specialist Hospital',
+    'Madni Trauma Centre',
+    'Jalalpur Jattan hospital',
+    'Gujrat hospital',
+    'pediatrics',
+    'cardiology',
+    'ENT specialist',
+    'orthopedics',
+    'gynecology',
+    'dermatology',
+    'WhatsApp appointment',
+    'trauma centre Punjab',
   ],
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    siteName: 'MediCinema Hospital',
-    title: 'MediCinema — World-Class Medical Care',
-    description: 'Experience world-class medical care. Book instantly via WhatsApp.',
+    siteName: 'Madni Specialist Hospital & Trauma Centre',
+    title: 'Madni Specialist Hospital & Trauma Centre',
+    description: 'Expert specialist care in Jalalpur Jattan. Book your appointment instantly via WhatsApp.',
   },
   robots: {
     index: true,

@@ -47,6 +47,7 @@ const inter = Inter({
    SEO METADATA
    ---------------------------------------------------------- */
 export const metadata: Metadata = {
+  metadataBase: new URL('https://madnihospital.com'),
   title: {
     default: 'Madni Specialist Hospital & Trauma Centre',
     template: '%s | Madni Specialist Hospital',
@@ -67,12 +68,20 @@ export const metadata: Metadata = {
     'WhatsApp appointment',
     'trauma centre Punjab',
   ],
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: '/favicon.png',
+    shortcut: '/favicon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     siteName: 'Madni Specialist Hospital & Trauma Centre',
     title: 'Madni Specialist Hospital & Trauma Centre',
     description: 'Expert specialist care in Jalalpur Jattan. Book your appointment instantly via WhatsApp.',
+    images: [{ url: '/favicon.png', width: 512, height: 512, alt: 'Madni Specialist Hospital' }],
   },
   robots: {
     index: true,
@@ -80,6 +89,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
 }
+
 
 export const viewport: Viewport = {
   width: 'device-width',
